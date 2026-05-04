@@ -9,18 +9,18 @@
 // network dependency is one less thing to break. Refresh if the county
 // reassigns a precinct: https://services2.arcgis.com/LgK9DpUhNjdU0HLy/arcgis/rest/services/Polling_Locations/FeatureServer/0/query?where=precinct+LIKE+%27Peters%25%27&outFields=*&f=json
 const PRECINCTS = {
-  A1: { people: ['David Ball',       'Lucy Christoforetti'], email: 'a1@petersrepublicans.com', polling: { name: 'South Hills Bible Chapel',         street: '300 Gallery Drive',   city: 'McMurray', zip: '15317' } },
-  A2: { people: ['Stephanie Rossi',  'Sam Perlmutter'],      email: 'a2@petersrepublicans.com', polling: { name: 'Center Presbyterian Church',       street: '255 Center Church Rd', city: 'McMurray', zip: '15317' } },
-  A3: { people: ['Brian Marcinko',   'Jodie Sherman'],       email: 'a3@petersrepublicans.com', polling: { name: 'South Hills Bible Chapel',         street: '300 Gallery Drive',   city: 'McMurray', zip: '15317' } },
-  B1: { people: ['Debbie Weiss',     'Steve Renz'],          email: 'b1@petersrepublicans.com', polling: { name: 'Peters Twp Community Room',        street: '200 Municipal Dr',    city: 'McMurray', zip: '15367' } },
-  B2: { people: ['Tony Knaus',       'Lawna Blankenship'],   email: 'b2@petersrepublicans.com', polling: { name: 'Peters Twp Community Rec Center',  street: '700 Meredith Dr',     city: 'Venetia',  zip: '15367' } },
-  B3: { people: ["Randy O'Connell",  'Barb Trahern'],        email: 'b3@petersrepublicans.com', polling: { name: 'Wrights United Methodist Church',  street: '788 Venetia Road',    city: 'Venetia',  zip: '15367' } },
-  C1: { people: ['Tyler Tommarello', 'Michelle Fellin'],     email: 'c1@petersrepublicans.com', polling: { name: "St. Benedict's Church",            street: '120 Abington Drive',  city: 'McMurray', zip: '15317' } },
-  C2: { people: ['Nick Gagianas',    'Lori McElroy'],        email: 'c2@petersrepublicans.com', polling: { name: "St. Benedict's Church",            street: '120 Abington Drive',  city: 'McMurray', zip: '15317' } },
-  C3: { people: ['Jim Fellen',       'Sas Argentine'],       email: 'c3@petersrepublicans.com', polling: { name: 'Center Presbyterian Church',       street: '255 Center Church Rd', city: 'McMurray', zip: '15317' } },
-  D1: { people: ['Derek Hensley',    'Christina Romano'],    email: 'd1@petersrepublicans.com', polling: { name: 'Peters Twp Community Rec Center',  street: '700 Meredith Dr',     city: 'Venetia',  zip: '15367' } },
-  D2: { people: ['Vacant',           'Tracy Melograne'],     email: 'd2@petersrepublicans.com', polling: { name: 'Lakeside Church',                  street: '337 Waterdam Rd',     city: 'McMurray', zip: '15317' } },
-  D3: { people: ['Frank Kosir, Jr',  'Tammy Wagner'],        email: 'd3@petersrepublicans.com', polling: { name: 'Crossroads Church of Christ',      street: '236 Thomas Rd',       city: 'McMurray', zip: '15317' } },
+  A1: { people: ['David Ball',       'Lucy Christoforetti'], email: 'a1@ptgop.com', polling: { name: 'South Hills Bible Chapel',         street: '300 Gallery Drive',   city: 'McMurray', zip: '15317' } },
+  A2: { people: ['Stephanie Rossi',  'Sam Perlmutter'],      email: 'a2@ptgop.com', polling: { name: 'Center Presbyterian Church',       street: '255 Center Church Rd', city: 'McMurray', zip: '15317' } },
+  A3: { people: ['Brian Marcinko',   'Jodie Sherman'],       email: 'a3@ptgop.com', polling: { name: 'South Hills Bible Chapel',         street: '300 Gallery Drive',   city: 'McMurray', zip: '15317' } },
+  B1: { people: ['Debbie Weiss',     'Steve Renz'],          email: 'b1@ptgop.com', polling: { name: 'Peters Twp Community Room',        street: '200 Municipal Dr',    city: 'McMurray', zip: '15367' } },
+  B2: { people: ['Tony Knaus',       'Lawna Blankenship'],   email: 'b2@ptgop.com', polling: { name: 'Peters Twp Community Rec Center',  street: '700 Meredith Dr',     city: 'Venetia',  zip: '15367' } },
+  B3: { people: ["Randy O'Connell",  'Barb Trahern'],        email: 'b3@ptgop.com', polling: { name: 'Wrights United Methodist Church',  street: '788 Venetia Road',    city: 'Venetia',  zip: '15367' } },
+  C1: { people: ['Tyler Tommarello', 'Michelle Fellin'],     email: 'c1@ptgop.com', polling: { name: "St. Benedict's Church",            street: '120 Abington Drive',  city: 'McMurray', zip: '15317' } },
+  C2: { people: ['Nick Gagianas',    'Lori McElroy'],        email: 'c2@ptgop.com', polling: { name: "St. Benedict's Church",            street: '120 Abington Drive',  city: 'McMurray', zip: '15317' } },
+  C3: { people: ['Jim Fellen',       'Sas Argentine'],       email: 'c3@ptgop.com', polling: { name: 'Center Presbyterian Church',       street: '255 Center Church Rd', city: 'McMurray', zip: '15317' } },
+  D1: { people: ['Derek Hensley',    'Christina Romano'],    email: 'd1@ptgop.com', polling: { name: 'Peters Twp Community Rec Center',  street: '700 Meredith Dr',     city: 'Venetia',  zip: '15367' } },
+  D2: { people: ['Vacant',           'Tracy Melograne'],     email: 'd2@ptgop.com', polling: { name: 'Lakeside Church',                  street: '337 Waterdam Rd',     city: 'McMurray', zip: '15317' } },
+  D3: { people: ['Frank Kosir, Jr',  'Tammy Wagner'],        email: 'd3@ptgop.com', polling: { name: 'Crossroads Church of Christ',      street: '236 Thomas Rd',       city: 'McMurray', zip: '15317' } },
 };
 
 const PRECINCT_ORDER = ['A1','A2','A3','B1','B2','B3','C1','C2','C3','D1','D2','D3'];
