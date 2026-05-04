@@ -19,7 +19,7 @@ const PRECINCTS = {
   C2: { people: ['Nick Gagianas',    'Lori McElroy'],        email: 'c2@ptgop.com', polling: { name: "St. Benedict's Church",            street: '120 Abington Drive',  city: 'McMurray', zip: '15317' } },
   C3: { people: ['Jim Fellen',       'Sas Argentine'],       email: 'c3@ptgop.com', polling: { name: 'Center Presbyterian Church',       street: '255 Center Church Rd', city: 'McMurray', zip: '15317' } },
   D1: { people: ['Derek Hensley',    'Christina Romano'],    email: 'd1@ptgop.com', polling: { name: 'Peters Twp Community Rec Center',  street: '700 Meredith Dr',     city: 'Venetia',  zip: '15367' } },
-  D2: { people: ['Vacant',           'Tracy Melograne'],     email: 'd2@ptgop.com', polling: { name: 'Lakeside Church',                  street: '337 Waterdam Rd',     city: 'McMurray', zip: '15317' } },
+  D2: { people: ['Tom Tomasik',      'Tracy Melograne'],     email: 'd2@ptgop.com', polling: { name: 'Lakeside Church',                  street: '337 Waterdam Rd',     city: 'McMurray', zip: '15317' } },
   D3: { people: ['Frank Kosir, Jr',  'Tammy Wagner'],        email: 'd3@ptgop.com', polling: { name: 'Crossroads Church of Christ',      street: '236 Thomas Rd',       city: 'McMurray', zip: '15317' } },
 };
 
