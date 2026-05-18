@@ -1777,7 +1777,7 @@ body.ballot-viewer-open { overflow: hidden; }
 }
 @media (max-width: 600px) {
   .ballot-tool-label { display: none; }
-  .ballot-tool { padding: 0.55rem 0.7rem; }
+  .ballot-tool { padding: 0.45rem 0.55rem; }
 }
 
 .ballot-viewer-stage {
@@ -1926,6 +1926,98 @@ body.ballot-viewer-open { overflow: hidden; }
   color: var(--blood);
   margin-right: 0.4rem;
   font-style: normal;
+}
+
+/* =========================================================
+   BALLOT VIEWER - mobile optimization
+   Goal: give the ballot image as much vertical and horizontal
+   room as possible. Header collapses to a single line, the
+   election sub-line + review note are dropped, side nav becomes
+   a thin overlay on the image, and the page sizes to fill the
+   stage instead of an absolute calc().
+   ========================================================= */
+
+@media (max-width: 640px) {
+  /* Full-bleed frame on phones */
+  .ballot-viewer-frame {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    border: 0;
+  }
+  .ballot-viewer-frame::before,
+  .ballot-viewer-frame::after { display: none; }
+
+  /* Single-line header: just the precinct title + tools.
+     Eyebrow + sub-line are noise on a small screen — the user
+     already chose this precinct one tap ago. */
+  .ballot-viewer-header {
+    padding: 0.7rem 0.85rem;
+    gap: 0.6rem;
+    align-items: center;
+  }
+  .ballot-viewer-eyebrow,
+  .ballot-viewer-sub { display: none; }
+  .ballot-viewer-title {
+    font-size: 1.55rem;
+    line-height: 1;
+  }
+
+  /* Tools: icon-only, slightly smaller */
+  .ballot-viewer-tools { gap: 0.35rem; }
+  .ballot-tool {
+    padding: 0.4rem 0.55rem;
+    min-width: 36px;
+    justify-content: center;
+  }
+
+  /* Stage becomes single column; side nav overlays the image */
+  .ballot-viewer-stage {
+    grid-template-columns: 1fr;
+  }
+  .ballot-page-wrap {
+    padding: 0.5rem;
+  }
+  .ballot-page {
+    max-height: 100%;
+  }
+  .ballot-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 60px;
+    border: 0;
+    background: color-mix(in srgb, var(--cream) 82%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px -2px rgba(0,0,0,0.18);
+    z-index: 2;
+  }
+  .ballot-nav-prev { left: 0;  border-radius: 0 4px 4px 0; }
+  .ballot-nav-next { right: 0; border-radius: 4px 0 0 4px; border-left: 0; }
+  .ballot-nav:disabled { opacity: 0.2; }
+
+  /* Zoom toggle: smaller and tucked to the corner */
+  .ballot-zoom-toggle {
+    width: 32px;
+    height: 32px;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  /* Footer: pager only, no review note (kept on desktop) */
+  .ballot-viewer-footer {
+    padding: 0.55rem 0.75rem 0.75rem;
+    gap: 0;
+  }
+  .ballot-viewer-note { display: none; }
+  .ballot-pager-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
 }
 
 /* =========================================================
