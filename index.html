@@ -41,6 +41,7 @@
   <nav class="nav" aria-label="Primary">
     <a href="#about">Committee</a>
     <a href="#finder">Finder</a>
+    <a href="#ballots">Ballots</a>
     <a href="#involved">Involved</a>
     <a href="#donate" class="nav-cta">Donate</a>
   </nav>
@@ -225,10 +226,49 @@
     </section>
   </section>
 
+  <!-- SAMPLE BALLOT -->
+  <section class="section section-ballots" id="ballots">
+    <div class="section-label reveal">
+      <span class="section-numeral">III.</span>
+      <span class="section-name">Sample Ballot</span>
+    </div>
+
+    <div class="ballots-lede reveal">
+      <p id="ballotsLede"></p>
+    </div>
+
+    <div class="ballots-banner reveal" id="ballotsBanner" hidden>
+      <span class="ballots-banner-rule" aria-hidden="true"></span>
+      <div class="ballots-banner-text">
+        <span class="ballots-banner-eyebrow" id="ballotsBannerName"></span>
+        <span class="ballots-banner-date" id="ballotsBannerDate"></span>
+      </div>
+      <span class="ballots-banner-rule" aria-hidden="true"></span>
+    </div>
+
+    <div class="ballots-grid-header reveal" id="ballotsGridHeader" hidden>
+      <span class="rollcall-star" aria-hidden="true">&#9733;</span>
+      <h2>Choose Your Precinct</h2>
+      <span class="rollcall-star" aria-hidden="true">&#9733;</span>
+    </div>
+
+    <div class="ballots-grid reveal" id="ballotsGrid" role="list"></div>
+
+    <div class="ballots-empty reveal" id="ballotsEmpty" hidden>
+      <p>
+        <em>No active election.</em>
+        Sample ballots will appear here as the next election approaches.
+        For the latest information, watch the
+        <a href="https://washingtonpa.gov/170/Elections" target="_blank" rel="noopener noreferrer">Washington County Elections office</a>
+        or <a href="#contact">write to the committee</a>.
+      </p>
+    </div>
+  </section>
+
   <!-- GET INVOLVED -->
   <section class="section section-involved" id="involved">
     <div class="section-label reveal">
-      <span class="section-numeral">III.</span>
+      <span class="section-numeral">IV.</span>
       <span class="section-name">Get Involved</span>
     </div>
 
@@ -269,7 +309,7 @@
   <!-- CONTACT -->
   <section class="section section-contact" id="contact">
     <div class="section-label reveal">
-      <span class="section-numeral">IV.</span>
+      <span class="section-numeral">V.</span>
       <span class="section-name">Write to the Committee</span>
     </div>
 
@@ -327,6 +367,59 @@
   </section>
 
 </main>
+
+<!-- BALLOT VIEWER (modal overlay) -->
+<div class="ballot-viewer" id="ballotViewer" hidden role="dialog" aria-modal="true" aria-labelledby="ballotViewerTitle">
+  <div class="ballot-viewer-backdrop" id="ballotViewerBackdrop" aria-hidden="true"></div>
+
+  <div class="ballot-viewer-frame" role="document">
+    <header class="ballot-viewer-header">
+      <div class="ballot-viewer-id">
+        <span class="ballot-viewer-eyebrow">Sample Ballot</span>
+        <h2 class="ballot-viewer-title" id="ballotViewerTitle"></h2>
+        <span class="ballot-viewer-sub" id="ballotViewerSub"></span>
+      </div>
+      <div class="ballot-viewer-tools">
+        <button type="button" class="ballot-tool" id="ballotPrintBtn" aria-label="Print sample ballot">
+          <span aria-hidden="true">&#9113;</span>
+          <span class="ballot-tool-label">Print</span>
+        </button>
+        <button type="button" class="ballot-tool ballot-tool-close" id="ballotCloseBtn" aria-label="Close ballot viewer">
+          <span aria-hidden="true">&times;</span>
+          <span class="ballot-tool-label">Close</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="ballot-viewer-stage" id="ballotViewerStage">
+      <button type="button" class="ballot-nav ballot-nav-prev" id="ballotPrevBtn" aria-label="Previous page">
+        <span aria-hidden="true">&larr;</span>
+      </button>
+
+      <div class="ballot-page-wrap">
+        <img class="ballot-page" id="ballotPageImg" alt="">
+        <button type="button" class="ballot-zoom-toggle" id="ballotZoomToggle" aria-label="Toggle zoom">
+          <span class="ballot-zoom-icon" id="ballotZoomIcon" aria-hidden="true">&plus;</span>
+        </button>
+      </div>
+
+      <button type="button" class="ballot-nav ballot-nav-next" id="ballotNextBtn" aria-label="Next page">
+        <span aria-hidden="true">&rarr;</span>
+      </button>
+    </div>
+
+    <footer class="ballot-viewer-footer">
+      <div class="ballot-pager" id="ballotPager" role="tablist" aria-label="Ballot pages"></div>
+      <p class="ballot-viewer-note">
+        <span class="ballot-viewer-asterisk" aria-hidden="true">&#9733;</span>
+        Please review the entire ballot. Pages are scanned from the official sample.
+      </p>
+    </footer>
+  </div>
+
+  <!-- Print-only stack: every page on its own printed sheet -->
+  <div class="ballot-print" id="ballotPrint" aria-hidden="true"></div>
+</div>
 
 <footer class="footer">
   <div class="footer-stripe" aria-hidden="true"></div>
