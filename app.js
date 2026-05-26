@@ -6,7 +6,7 @@
 // Single source of truth for the current election. Flip `active` to false
 // between elections; the ballot section will switch to a "coming soon" state.
 const ELECTION = {
-  active: true,
+  active: false,
   name: 'Republican Primary Election',
   dateLabel: 'Tuesday, May 19, 2026',
   imagePath: '/ballots',
