@@ -1,0 +1,74 @@
+name: Update a committee person
+description: Change who is listed for a precinct — a new PCP, a resignation, or a correction to a name.
+title: "Update PCP: "
+labels: ["pcp"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to change the two people listed for a precinct on the website.
+
+        Once you submit, a draft change is prepared automatically and a preview
+        link is posted back here so you can see exactly how it will look before
+        anything goes live.
+
+  - type: dropdown
+    id: precinct
+    attributes:
+      label: Precinct
+      description: Which precinct is changing?
+      options:
+        - A1
+        - A2
+        - A3
+        - B1
+        - B2
+        - B3
+        - C1
+        - C2
+        - C3
+        - D1
+        - D2
+        - D3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: seat
+    attributes:
+      label: Which seat
+      description: Each precinct lists two people. Which one is changing?
+      options:
+        - First listed
+        - Second listed
+        - Not sure — the name below will tell you
+    validations:
+      required: true
+
+  - type: input
+    id: current_name
+    attributes:
+      label: Name currently on the site
+      description: Who is listed there now? Write "Seat vacant" if the seat is empty.
+      placeholder: Jane Smith
+    validations:
+      required: true
+
+  - type: input
+    id: new_name
+    attributes:
+      label: New name
+      description: >
+        The name exactly as it should appear. Write "Vacant" if the seat is
+        being emptied.
+      placeholder: John Doe
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else we should know
+      description: Optional. Effective date, spelling preference, who to check with.
+    validations:
+      required: false

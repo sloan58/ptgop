@@ -1,0 +1,50 @@
+name: Approve and merge
+
+# A committee member comments /approve on the pull request after looking at the
+# Cloudflare preview. This workflow is deliberately not Claude — whether to
+# merge is a decision that should be mechanical, not judged.
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  merge:
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/approve')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check the commenter has write access
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        run: |
+          perm=$(gh api "repos/${{ github.repository }}/collaborators/$ACTOR/permission" --jq .permission)
+          echo "$ACTOR has: $perm"
+          if [ "$perm" != "write" ] && [ "$perm" != "admin" ]; then
+            gh api "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments" \
+              -f body="@$ACTOR approvals can only come from committee members with repository access. Nothing has been merged."
+            exit 1
+          fi
+
+      - name: Require checks to be passing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.issue.number }}
+        run: |
+          if ! gh pr checks "$PR" --repo "${{ github.repository }}"; then
+            gh pr comment "$PR" --repo "${{ github.repository }}" \
+              --body "Checks are not passing yet, so this was not merged. If they are still running, comment \`/approve\` again once they finish."
+            exit 1
+          fi
+
+      - name: Merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.issue.number }}
+        run: |
+          gh pr merge "$PR" --repo "${{ github.repository }}" --squash --delete-branch
+          gh pr comment "$PR" --repo "${{ github.repository }}" \
+            --body "Merged. Cloudflare is deploying it to ptgop.com now — give it a minute, then check the live site."

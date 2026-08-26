@@ -1,0 +1,7 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Something else about the website
+    url: https://github.com/sloan58/ptgop/issues/new
+    about: >
+      For anything that isn't a committee-person or ballot change, open a blank
+      issue and describe it. Those are handled by hand rather than automatically.
