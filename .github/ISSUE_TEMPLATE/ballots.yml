@@ -1,0 +1,70 @@
+name: Sample ballots
+description: Post sample ballots for an upcoming election, or take them down after one.
+title: "Ballots: "
+labels: ["ballots"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to put sample ballots on the site before an election, or
+        to take them down once it is over.
+
+        A draft change is prepared automatically and a preview link is posted
+        back here. **Ballots do not go live until someone approves that preview.**
+
+  - type: dropdown
+    id: action
+    attributes:
+      label: What needs to happen
+      options:
+        - Post ballots for an upcoming election
+        - Take down the ballots — the election is over
+    validations:
+      required: true
+
+  - type: input
+    id: election_name
+    attributes:
+      label: Election name
+      description: Only needed when posting ballots. Appears as a heading on the site.
+      placeholder: Republican Primary Election
+    validations:
+      required: false
+
+  - type: input
+    id: election_date
+    attributes:
+      label: Election date
+      description: Only needed when posting ballots. Write it the way it should read on the site.
+      placeholder: Tuesday, May 19, 2026
+    validations:
+      required: false
+
+  - type: textarea
+    id: pdfs
+    attributes:
+      label: Ballot PDFs
+      description: >
+        Only needed when posting ballots. Drag the PDF files into this box to
+        attach them — one per precinct. Name them so the precinct is obvious,
+        or list below which file belongs to which precinct.
+    validations:
+      required: false
+
+  - type: textarea
+    id: coverage
+    attributes:
+      label: Precincts without a ballot
+      description: >
+        Optional. If any precinct has no ballot this election, list it here so
+        its tile is shown as unavailable rather than broken.
+      placeholder: e.g. C2 has no Republican ballot this cycle
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else we should know
+    validations:
+      required: false
