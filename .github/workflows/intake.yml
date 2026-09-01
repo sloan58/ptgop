@@ -3,13 +3,19 @@ name: Committee issue intake
 # Fires when a committee member files one of the issue forms. The forms apply
 # their own labels, so nothing here needs a human to label anything.
 #
+# `labeled` is a trigger too, so applying `pcp` or `ballots` by hand is the way
+# to retry an issue whose intake was skipped or failed. Re-running the skipped
+# run does not work — a re-run replays the original event payload, so a run
+# that skipped on an unlabeled issue skips again no matter what labels the
+# issue carries now.
+#
 # Who can trigger this is not checked here — claude-code-action requires the
 # triggering user to have write access to the repository and rejects bot
 # actors, before Claude starts. An issue from anyone else fails the run.
 
 on:
   issues:
-    types: [opened]
+    types: [opened, labeled]
 
 concurrency:
   group: intake-${{ github.event.issue.number }}
