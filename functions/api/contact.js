@@ -65,7 +65,7 @@ async function handleContact({ request, env, waitUntil }) {
   }
 
   // 1. Formspree — the committee's inbox. This one has to succeed.
-  const formspree = await sendToFormspree(env, { name, email, phone: phoneE164, address, message, consent });
+  const formspree = await sendToFormspree(env, request, { name, email, phone: phoneE164, address, message, consent });
   if (!formspree.ok) {
     console.error('Formspree rejected submission:', formspree.error);
     return json({ ok: false, error: formspree.error }, 502);
@@ -86,23 +86,30 @@ async function handleContact({ request, env, waitUntil }) {
 
 /* ---------- Formspree ---------- */
 
-async function sendToFormspree(env, fields) {
+async function sendToFormspree(env, request, fields) {
   const endpoint = env.FORMSPREE_ENDPOINT || DEFAULT_FORMSPREE;
 
   const body = new FormData();
-  body.set('name',    fields.name);
-  body.set('email',   fields.email);
-  if (fields.phone)   body.set('phone', fields.phone);
-  body.set('address', fields.address);
-  body.set('message', fields.message);
-  body.set('consent', fields.consent ? 'yes' : 'no');
+  body.set('name',     fields.name);
+  body.set('email',    fields.email);
+  body.set('_replyto', fields.email);          // reply from the inbox goes to the sender
+  if (fields.phone)    body.set('phone', fields.phone);
+  body.set('address',  fields.address);
+  body.set('message',  fields.message);
+  body.set('consent',  fields.consent ? 'yes' : 'no');
+
+  // Formspree scores submissions on where they came from. A bare
+  // server-to-server post (no Origin/Referer, non-browser UA) gets
+  // accepted with a 200 and then quarantined as spam, so pass the
+  // visitor's browser context through as if they had posted directly.
+  const headers = { Accept: 'application/json' };
+  for (const h of ['Origin', 'Referer', 'User-Agent', 'Accept-Language']) {
+    const v = request.headers.get(h);
+    if (v) headers[h] = v;
+  }
 
   try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      body,
-      headers: { Accept: 'application/json' }
-    });
+    const res = await fetch(endpoint, { method: 'POST', body, headers });
     if (res.ok) return { ok: true };
     const data = await res.json().catch(() => null);
     return { ok: false, error: data?.errors?.[0]?.message || `Formspree HTTP ${res.status}` };
