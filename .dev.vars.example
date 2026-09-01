@@ -1,6 +1,7 @@
 # Local values for `npx wrangler pages dev .` — copy to .dev.vars (gitignored).
 # In production these live in the Cloudflare Pages dashboard under
-# Settings → Environment variables.
+# Settings → Variables and secrets.
 BREVO_API_KEY=xkeysib-your-key-here
-BREVO_LIST_ID=2
-# FORMSPREE_ENDPOINT=https://formspree.io/f/mkokqgjg
+BREVO_LIST_ID=4
+# CONTACT_TO=info@ptgop.com
+# CONTACT_FROM=info@ptgop.com   # must be a verified sender in Brevo

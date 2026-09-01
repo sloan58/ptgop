@@ -542,10 +542,11 @@ if (suggestionsEl) {
 
 /* =========================================================
    CONTACT FORM
-   Submits via fetch to the Worker at /api/contact, which emails
-   the note (Formspree) and, with consent, adds the visitor to
-   the Brevo contact list. A 2xx is success; a 4xx carries a
-   message we can show; anything else gets the generic fallback.
+   Submits via fetch to the Pages Function at /api/contact, which
+   emails the note through Brevo and, with consent, adds the
+   visitor to the Brevo contact list. A 2xx is success; a 4xx
+   carries a message we can show; anything else gets the generic
+   fallback.
    ========================================================= */
 
 const contactForm    = document.getElementById('contactForm');

@@ -1,28 +1,30 @@
 /* =========================================================
    POST /api/contact  (Cloudflare Pages Function)
 
-   The contact form posts here instead of straight to Formspree.
-   This does two things the browser can't do safely on its own:
+   The contact form posts here. Everything goes through Brevo,
+   as it did on the old WordPress site:
 
-     1. Forwards the note to Formspree so the committee still
-        gets the email it always has.
+     1. Emails the note to the committee inbox via Brevo's
+        transactional API, reply-to set to the visitor.
      2. If the visitor ticked the consent box, upserts them as a
-        Brevo contact (name, email, phone) on the committee's
-        list — the same list the old WordPress site fed.
+        Brevo contact (name, email, phone) on the committee's list.
 
    Configuration — Cloudflare dashboard → Pages project → Settings
-   → Environment variables (set for BOTH Production and Preview):
+   → Variables and secrets (set for BOTH Production and Preview):
 
-     BREVO_API_KEY       secret   Brevo → SMTP & API → API keys
-     BREVO_LIST_ID       plain    Brevo → Contacts → Lists; id is in the URL
-     FORMSPREE_ENDPOINT  plain    optional; defaults to the committee's form
+     BREVO_API_KEY   secret  Brevo → SMTP & API → API keys
+     BREVO_LIST_ID   text    Brevo → Contacts → Lists; id is in the URL
+     CONTACT_TO      text    optional; inbox for notes (default info@ptgop.com)
+     CONTACT_FROM    text    optional; must be a verified Brevo sender
+                             (default info@ptgop.com)
 
    Locally: copy .dev.vars.example → .dev.vars, then
      npx wrangler pages dev .
    ========================================================= */
 
-const DEFAULT_FORMSPREE = 'https://formspree.io/f/mkokqgjg';
 const BREVO_CONTACTS_URL = 'https://api.brevo.com/v3/contacts';
+const BREVO_EMAIL_URL    = 'https://api.brevo.com/v3/smtp/email';
+const DEFAULT_INBOX      = 'info@ptgop.com';
 
 export async function onRequest(context) {
   if (context.request.method !== 'POST') {
@@ -64,15 +66,20 @@ async function handleContact({ request, env, waitUntil }) {
     }
   }
 
-  // 1. Formspree — the committee's inbox. This one has to succeed.
-  const formspree = await sendToFormspree(env, request, { name, email, phone: phoneE164, address, message, consent });
-  if (!formspree.ok) {
-    console.error('Formspree rejected submission:', formspree.error);
-    return json({ ok: false, error: formspree.error }, 502);
+  if (!env.BREVO_API_KEY) {
+    console.error('BREVO_API_KEY is not set; cannot deliver contact form notes.');
+    return json({ ok: false, error: 'The contact form is not configured yet. Please email info@ptgop.com directly.' }, 500);
   }
 
-  // 2. Brevo — only with consent, and never at the expense of the
-  //    note itself. Finishes after the response is sent.
+  // 1. The note itself — this one has to succeed.
+  const sent = await emailNote(env, { name, email, phone: phoneE164, address, message, consent });
+  if (!sent.ok) {
+    console.error('Brevo email send failed:', sent.error);
+    return json({ ok: false, error: 'Something went wrong sending your note. Please try again, or email info@ptgop.com directly.' }, 502);
+  }
+
+  // 2. Contact list — only with consent, and never at the expense
+  //    of the note. Finishes after the response is sent.
   if (consent) {
     waitUntil(
       addToBrevo(env, { name, email, phone: phoneE164 }).catch((err) => {
@@ -84,48 +91,54 @@ async function handleContact({ request, env, waitUntil }) {
   return json({ ok: true });
 }
 
-/* ---------- Formspree ---------- */
+/* ---------- Brevo: transactional email ---------- */
 
-async function sendToFormspree(env, request, fields) {
-  const endpoint = env.FORMSPREE_ENDPOINT || DEFAULT_FORMSPREE;
+async function emailNote(env, f) {
+  const to   = env.CONTACT_TO   || DEFAULT_INBOX;
+  const from = env.CONTACT_FROM || DEFAULT_INBOX;
 
-  const body = new FormData();
-  body.set('name',     fields.name);
-  body.set('email',    fields.email);
-  body.set('_replyto', fields.email);          // reply from the inbox goes to the sender
-  if (fields.phone)    body.set('phone', fields.phone);
-  body.set('address',  fields.address);
-  body.set('message',  fields.message);
-  body.set('consent',  fields.consent ? 'yes' : 'no');
+  const rows = [
+    ['Name',    f.name],
+    ['Email',   f.email],
+    ['Phone',   f.phone || '—'],
+    ['Address', f.address || '—'],
+    ['Consent', f.consent ? 'Yes — agreed to email and text updates' : 'No']
+  ];
 
-  // Formspree scores submissions on where they came from. A bare
-  // server-to-server post (no Origin/Referer, non-browser UA) gets
-  // accepted with a 200 and then quarantined as spam, so pass the
-  // visitor's browser context through as if they had posted directly.
-  const headers = { Accept: 'application/json' };
-  for (const h of ['Origin', 'Referer', 'User-Agent', 'Accept-Language']) {
-    const v = request.headers.get(h);
-    if (v) headers[h] = v;
-  }
+  const textContent =
+    rows.map(([k, v]) => `${k}: ${v}`).join('\n') +
+    `\n\nMessage:\n${f.message}\n\n— Sent from the contact form at ptgop.com`;
+
+  const htmlContent =
+    `<table cellpadding="4" style="font-family:sans-serif;font-size:15px">` +
+    rows.map(([k, v]) => `<tr><td style="color:#555"><b>${k}</b></td><td>${escapeHtml(v)}</td></tr>`).join('') +
+    `</table>` +
+    `<p style="font-family:sans-serif;font-size:15px;white-space:pre-wrap">${escapeHtml(f.message)}</p>` +
+    `<p style="font-family:sans-serif;font-size:12px;color:#888">Sent from the contact form at ptgop.com</p>`;
+
+  const payload = {
+    sender:  { name: 'ptgop.com contact form', email: from },
+    to:      [{ email: to, name: 'Peters Township Republican Committee' }],
+    replyTo: { email: f.email, name: f.name },
+    subject: `Note from ${f.name} via ptgop.com`,
+    textContent,
+    htmlContent,
+    tags: ['contact-form']
+  };
 
   try {
-    const res = await fetch(endpoint, { method: 'POST', body, headers });
+    const res = await brevoFetch(env, BREVO_EMAIL_URL, payload);
     if (res.ok) return { ok: true };
     const data = await res.json().catch(() => null);
-    return { ok: false, error: data?.errors?.[0]?.message || `Formspree HTTP ${res.status}` };
+    return { ok: false, error: data?.message || `Brevo HTTP ${res.status}` };
   } catch (err) {
-    return { ok: false, error: `Formspree unreachable: ${err.message}` };
+    return { ok: false, error: `Brevo unreachable: ${err.message}` };
   }
 }
 
-/* ---------- Brevo ---------- */
+/* ---------- Brevo: contact list ---------- */
 
 async function addToBrevo(env, { name, email, phone }) {
-  if (!env.BREVO_API_KEY) {
-    console.warn('BREVO_API_KEY not set; skipping Brevo contact upsert.');
-    return;
-  }
-
   const listId = Number.parseInt(env.BREVO_LIST_ID, 10);
   if (!Number.isFinite(listId)) {
     console.warn('BREVO_LIST_ID not set; contact will be created without a list.');
@@ -156,7 +169,17 @@ async function addToBrevo(env, { name, email, phone }) {
 }
 
 async function brevoUpsert(env, payload) {
-  const res = await fetch(BREVO_CONTACTS_URL, {
+  const res = await brevoFetch(env, BREVO_CONTACTS_URL, payload);
+
+  // 201 = created, 204 = updated an existing contact (updateEnabled)
+  if (res.ok) return { ok: true };
+
+  const data = await res.json().catch(() => null);
+  return { ok: false, error: data?.message || `Brevo HTTP ${res.status}` };
+}
+
+function brevoFetch(env, url, payload) {
+  return fetch(url, {
     method: 'POST',
     headers: {
       'api-key': env.BREVO_API_KEY,
@@ -165,12 +188,6 @@ async function brevoUpsert(env, payload) {
     },
     body: JSON.stringify(payload)
   });
-
-  // 201 = created, 204 = updated an existing contact (updateEnabled)
-  if (res.ok) return { ok: true };
-
-  const data = await res.json().catch(() => null);
-  return { ok: false, error: data?.message || `Brevo HTTP ${res.status}` };
 }
 
 /* ---------- helpers ---------- */
@@ -195,6 +212,10 @@ function splitName(name) {
   const parts = name.split(/\s+/).filter(Boolean);
   if (parts.length <= 1) return { first: parts[0] || '', last: '' };
   return { first: parts[0], last: parts.slice(1).join(' ') };
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function json(body, status = 200, extraHeaders = {}) {
