@@ -322,7 +322,7 @@
 
     <form class="contact-form reveal"
           id="contactForm"
-          action="https://formspree.io/f/mkokqgjg"
+          action="/api/contact"
           method="POST"
           novalidate>
       <div class="contact-field">
@@ -333,6 +333,14 @@
       <div class="contact-field">
         <label for="contactEmail" class="contact-label">Email</label>
         <input type="email" id="contactEmail" name="email" class="contact-input" required autocomplete="email">
+      </div>
+
+      <div class="contact-field">
+        <label for="contactPhone" class="contact-label">
+          Phone
+          <span class="contact-optional">Optional &middot; for the occasional text about an event or election day</span>
+        </label>
+        <input type="tel" id="contactPhone" name="phone" class="contact-input" autocomplete="tel" inputmode="tel" placeholder="(724) 555-0123">
       </div>
 
       <div class="contact-field">
@@ -348,7 +356,20 @@
         <textarea id="contactMessage" name="message" class="contact-textarea" rows="5" required></textarea>
       </div>
 
-      <!-- Honeypot: must stay empty. Bots fill it and get silently rejected by Formspree. -->
+      <div class="contact-field contact-consent">
+        <label class="contact-consent-label">
+          <input type="checkbox" id="contactConsent" name="consent" value="yes" class="contact-checkbox">
+          <span class="contact-consent-box" aria-hidden="true"></span>
+          <span class="contact-consent-text">
+            Yes, keep me posted. I agree to receive emails and, if I've shared my number, text messages
+            from the Peters Township Republican Committee about meetings, events, and elections.
+            Message and data rates may apply. Reply STOP to any text to opt out, or unsubscribe
+            from any email at any time.
+          </span>
+        </label>
+      </div>
+
+      <!-- Honeypot: must stay empty. Bots fill it and the Worker quietly drops the submission. -->
       <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="contact-honeypot">
 
       <div class="contact-submit">

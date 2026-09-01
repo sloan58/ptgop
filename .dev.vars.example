@@ -1,0 +1,6 @@
+# Local values for `npx wrangler pages dev .` — copy to .dev.vars (gitignored).
+# In production these live in the Cloudflare Pages dashboard under
+# Settings → Environment variables.
+BREVO_API_KEY=xkeysib-your-key-here
+BREVO_LIST_ID=2
+# FORMSPREE_ENDPOINT=https://formspree.io/f/mkokqgjg
