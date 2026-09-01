@@ -542,9 +542,11 @@ if (suggestionsEl) {
 
 /* =========================================================
    CONTACT FORM
-   Submits via fetch so the page stays put. Formspree returns
-   a 2xx on success; anything else we treat as an error and
-   surface a fallback to email directly.
+   Submits via fetch to the Pages Function at /api/contact, which
+   emails the note through Brevo and, with consent, adds the
+   visitor to the Brevo contact list. A 2xx is success; a 4xx
+   carries a message we can show; anything else gets the generic
+   fallback.
    ========================================================= */
 
 const contactForm    = document.getElementById('contactForm');
@@ -567,7 +569,9 @@ if (contactForm) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.errors?.[0]?.message || `HTTP ${res.status}`);
+        const err  = new Error(data?.error || data?.errors?.[0]?.message || `HTTP ${res.status}`);
+        if (res.status >= 400 && res.status < 500 && data?.error) err.userMessage = data.error;
+        throw err;
       }
 
       contactForm.hidden = true;
@@ -580,7 +584,8 @@ if (contactForm) {
     } catch (err) {
       console.error('Contact form submission failed:', err);
       if (contactError) {
-        contactError.textContent = 'Something went wrong sending your note. Please try again, or email info@ptgop.com directly.';
+        contactError.textContent = err.userMessage
+          || 'Something went wrong sending your note. Please try again, or email info@ptgop.com directly.';
         contactError.hidden = false;
       }
     } finally {

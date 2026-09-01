@@ -1154,6 +1154,63 @@ a { color: var(--ink); }
   min-height: 140px;
 }
 
+.contact-consent {
+  margin-bottom: 2.5rem;
+}
+.contact-consent-label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 1rem;
+  align-items: start;
+  cursor: pointer;
+}
+.contact-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+.contact-consent-box {
+  display: block;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.3rem;
+  border: 1.5px solid var(--rule-2);
+  background: transparent;
+  position: relative;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+.contact-consent-box::after {
+  content: "";
+  position: absolute;
+  inset: 0.2rem;
+  background: var(--cream);
+  transform: scale(0);
+  transition: transform 0.2s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.contact-checkbox:checked + .contact-consent-box {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+.contact-checkbox:checked + .contact-consent-box::after {
+  transform: scale(1);
+}
+.contact-checkbox:focus-visible + .contact-consent-box {
+  outline: 2px solid var(--blood);
+  outline-offset: 3px;
+}
+.contact-consent-label:hover .contact-consent-box {
+  border-color: var(--ink-soft);
+}
+.contact-consent-text {
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
 .contact-honeypot {
   position: absolute;
   left: -9999px;
