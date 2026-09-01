@@ -108,7 +108,11 @@ validator means the site would render broken.
 
 ## Opening the PR
 
-- Branch name: `issue-<number>-<short-slug>`.
+- Branch name: `issue-<number>-<short-slug>`. **Keep this exact shape.** Two
+  workflows parse the issue number back out of it: `preview.yml` to mirror the
+  preview link onto the right issue, and `approve.yml` to find the change an
+  `/approve` on that issue refers to. A branch that does not start
+  `issue-<number>-` silently loses both.
 - Title: plain language, what changed. "Fill D2 seat with Tom Tomasik", not
   "fix(data): update PRECINCTS".
 - Body: what you changed and why, the issue it closes, and — if you ignored
@@ -116,13 +120,22 @@ validator means the site would render broken.
 - Commit message: match the repository's existing style. Look at `git log`;
   they are short, plain sentences in the imperative.
 
-Then comment on the original issue telling the requester that a preview is
-being built and will appear as a comment on the pull request shortly, and that
-the change goes live once someone with access approves it there.
+## Reporting back to the requester
 
-Do not merge. Do not deploy. Do not comment the preview URL yourself —
-Cloudflare posts it on the PR on its own, and a link you construct by hand is
-likely to be wrong.
+Comment on the original issue saying what you changed, in plain language, and
+that a preview link will appear on that issue in a few minutes.
+
+Write for someone who has never used GitHub and never will. **Never send them
+to the pull request.** `preview.yml` mirrors Cloudflare's preview link back
+onto the issue, and `/approve` is accepted in the issue thread, so the issue is
+the only place they ever need to look. Do not mention pull requests, branches,
+merging, or checks — none of it is theirs to do anything about. "A preview link
+will show up here shortly" is the whole message.
+
+Do not merge. Do not deploy. Do not comment a preview URL yourself — branch
+preview hostnames are the branch name truncated to 28 characters, so a link you
+construct by hand is wrong exactly when the slug is long. `preview.yml` reads
+the real URL out of Cloudflare's own comment.
 
 ## When in doubt
 

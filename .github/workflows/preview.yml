@@ -1,0 +1,82 @@
+name: Post the preview link to the issue
+
+# Cloudflare Pages comments its preview URLs on the pull request. Committee
+# members are not GitHub users, they filed an issue, and the issue is the only
+# thread they are watching — telling them to go find a pull request is the same
+# as telling them to give up. This mirrors the link back to the issue in plain
+# language and tells them how to publish it.
+#
+# The URL is read out of Cloudflare's comment, never constructed. Branch
+# preview hostnames are the branch name sanitised and truncated to 28
+# characters, so a hand-built link is wrong exactly when the slug is long.
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  mirror:
+    # Cloudflare edits its comment in place on each push, so `edited` matters:
+    # the first version often says "Deploying" with no URL in it yet.
+    if: >
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'cloudflare-workers-and-pages[bot]' &&
+      contains(github.event.comment.body, 'Branch Preview URL')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: read
+    steps:
+      - name: Mirror the preview link onto the issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+          # Read through the environment, never interpolated into the script.
+          COMMENT: ${{ github.event.comment.body }}
+        run: |
+          set -euo pipefail
+
+          url=$(python3 - <<'PY'
+          import os, re
+          m = re.search(r"Branch Preview URL.*?href='([^']+)'", os.environ["COMMENT"], re.S)
+          print(m.group(1) if m else "")
+          PY
+          )
+          if [ -z "$url" ]; then
+            echo "No branch preview URL in the comment yet; nothing to mirror."
+            exit 0
+          fi
+
+          # Intake names its branches issue-<number>-<slug>. A pull request
+          # opened by hand has no issue to mirror to, and that is fine.
+          branch=$(gh pr view "$PR" --repo "$REPO" --json headRefName --jq .headRefName)
+          issue=$(printf '%s' "$branch" | sed -n 's/^issue-\([0-9]\{1,\}\)-.*/\1/p')
+          if [ -z "$issue" ]; then
+            echo "Branch $branch is not from issue intake; nothing to mirror."
+            exit 0
+          fi
+
+          # Cloudflare re-edits its comment on every push, which fires this
+          # workflow again. Only say it once per URL.
+          if gh api "repos/$REPO/issues/$issue/comments" --paginate --jq '.[].body' \
+               | grep -qF "$url"; then
+            echo "Already posted $url to issue #$issue."
+            exit 0
+          fi
+
+          gh api "repos/$REPO/issues/$issue/comments" -f body="Your change is ready to look at:
+
+          **$url**
+
+          Open that link and check it reads the way you expect. This is a private
+          preview — nothing on ptgop.com has changed yet.
+
+          If it looks right, reply here with:
+
+              /approve
+
+          That publishes it to ptgop.com, usually within a minute. If something
+          looks wrong, reply here saying what — no special wording needed — and
+          someone will pick it up."
+          echo "Posted $url to issue #$issue."
