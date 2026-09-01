@@ -33,18 +33,6 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: seat
-    attributes:
-      label: Which seat
-      description: Each precinct lists two people. Which one is changing?
-      options:
-        - First listed
-        - Second listed
-        - Not sure — the name below will tell you
-    validations:
-      required: true
-
   - type: input
     id: current_name
     attributes:

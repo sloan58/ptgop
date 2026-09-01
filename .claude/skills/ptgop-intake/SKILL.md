@@ -45,11 +45,16 @@ and stop.
 ## Handling a committee-person change
 
 1. Read the current `PRECINCTS` block in `app.js`.
-2. Find the precinct named in the form. Confirm the "name currently on the
-   site" field actually matches what is there.
-   - If it doesn't match, **stop**. Comment on the issue quoting what the site
-     currently says and ask which person they mean. Do not guess. Two people
-     share each precinct and picking the wrong one silently removes someone.
+2. Find the precinct named in the form. The "name currently on the site" field
+   is the only thing identifying which of its two seats to change — the form
+   does not ask which seat, because committee people have distinct names.
+   Match it against the two entries.
+   - If it matches neither, **stop**. Comment on the issue quoting what the
+     site currently says and ask who they mean. Do not guess: picking the
+     wrong seat silently removes someone who is still serving.
+   - If the current name is `Vacant` and *both* seats are vacant, that is not
+     ambiguous — either one produces the same roster. Fill the first and carry
+     on without asking.
 3. Replace that one name. Keep the array at exactly two entries — a seat being
    emptied becomes the string `'Vacant'`, never a removed entry.
 4. Preserve the file's column alignment. The `PRECINCTS` block is written as an
